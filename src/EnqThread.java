@@ -15,14 +15,16 @@ public class EnqThread extends Thread
 	{
 		while( go )
 		{
-			queue.createAndEnq();
+
 			Random rand = new Random();
+
 			try {
-				sleep(9 + rand.nextInt( 3 ) );
+				sleep( rand.nextInt(100) );
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			queue.createAndEnq();
 		}
 	} 
 	

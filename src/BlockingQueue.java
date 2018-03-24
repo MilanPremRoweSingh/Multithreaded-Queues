@@ -1,4 +1,8 @@
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class BlockingQueue extends ThreadsafeQueue
 {
@@ -68,10 +72,6 @@ public class BlockingQueue extends ThreadsafeQueue
 	{
 		int p,q,n;
 		
-		p = 1;
-		q = 1;
-		n = 10;
-		
 		try
 		{
 			p = Integer.parseInt( args[0] );
@@ -100,7 +100,7 @@ public class BlockingQueue extends ThreadsafeQueue
 		EnqThread[] enqThreads = new EnqThread[ p ];
 		DeqThread[] deqThreads = new DeqThread[ q ];
 		
-		for ( int i = 0; i < p; i++ )
+		for ( int i = 0; i < p; i++ ) 
 		{
 			enqThreads[ i ] = new EnqThread( blockingQueue );
 			enqThreads[ i ].start();
@@ -110,6 +110,65 @@ public class BlockingQueue extends ThreadsafeQueue
 		{
 			deqThreads[ i ] = new DeqThread( blockingQueue, n );
 			deqThreads[ i ].start();
+		}
+		
+		for ( int i = 0; i < q; i++ )
+		{
+			deqThreads[ i ].join();
+		}
+		
+		for ( int i = 0; i < p; i++ ) 
+		{
+			enqThreads[ i ].flipGo();
+		}
+		
+		for ( int i = 0; i < p; i++ ) 
+		{
+			enqThreads[ i ].join();
+		}
+		
+		ArrayList<Operation> operations = new ArrayList<Operation>();
+		for ( int i = 0; i < q; i++ )
+		{
+			for( Item item : deqThreads[ i ].deqItems )
+			{
+				operations.add( new Operation( item.getEnqTime(), "enq", item.getId() ) );
+				operations.add( new Operation( item.getDeqTime(), "deq", item.getId() ) );
+			}
+		}
+		
+		Collections.sort( operations, new Comparator<Operation>() 
+		{
+
+			@Override
+			public int compare(Operation o1, Operation o2) {
+				return o1.time.compareTo( o2.time );
+			}
+			
+		} );
+		
+		for( Operation op : operations )
+		{
+			System.out.println( op.toString() );
+		}
+	}
+	
+	private static class Operation
+	{
+		public LocalDateTime time;
+		String name;
+		int id;
+		
+		Operation( LocalDateTime _time, String _name, int _id )
+		{
+			time = _time;
+			name = _name;
+			id = _id;
+		}
+		
+		public String toString()
+		{
+			return name + " " + id + " - " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond() +"." + time.getNano()/1000000;
 		}
 	}
 	
