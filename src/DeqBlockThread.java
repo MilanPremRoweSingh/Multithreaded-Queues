@@ -1,13 +1,13 @@
 import java.util.ArrayList;
 import java.util.Random;
 
-public class DeqThread extends Thread
+public class DeqBlockThread extends Thread
 {
 	ArrayList<Item> deqItems;
-	ThreadsafeQueue queue;
+	BlockingQueue queue;
 	int numItems;
 	
-	DeqThread( ThreadsafeQueue _queue, int _numItems )
+	DeqBlockThread( BlockingQueue _queue, int _numItems )
 	{
 		numItems = _numItems;
 		queue = _queue;
@@ -20,18 +20,15 @@ public class DeqThread extends Thread
 	{
 		for( int i = 0; i < numItems; i++ )
 		{
-
 			Random rand = new Random();
 			try {
-				sleep( rand.nextInt(100) );
+				sleep( 5 + rand.nextInt(10) );
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 			deqItems.add( queue.deq() );
-			
-			
 		}
 	}
 	

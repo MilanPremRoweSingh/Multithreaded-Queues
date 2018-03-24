@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class BlockingQueue extends ThreadsafeQueue
+public class BlockingQueue
 {
+	public int currID = 0;
 	Item head, tail;
 	
 	BlockingQueue()
@@ -28,7 +29,7 @@ public class BlockingQueue extends ThreadsafeQueue
 				tail.next = i;
 			}
 			tail = i;
-			i.setEnqTime( LocalDateTime.now() );
+			i.setEnqTime( System.currentTimeMillis() );
 			this.notify();
 		}
 	}
@@ -59,7 +60,7 @@ public class BlockingQueue extends ThreadsafeQueue
 			}
 			Item i = head;
 			head = head.next;
-			i.setDeqTime( LocalDateTime.now() );
+			i.setDeqTime( System.currentTimeMillis() );
 			
 			if( head == null )
 				tail = null;
@@ -97,18 +98,18 @@ public class BlockingQueue extends ThreadsafeQueue
 		
 		BlockingQueue blockingQueue = new BlockingQueue();
 		
-		EnqThread[] enqThreads = new EnqThread[ p ];
-		DeqThread[] deqThreads = new DeqThread[ q ];
+		EnqBlockThread[] enqThreads = new EnqBlockThread[ p ];
+		DeqBlockThread[] deqThreads = new DeqBlockThread[ q ];
 		
 		for ( int i = 0; i < p; i++ ) 
 		{
-			enqThreads[ i ] = new EnqThread( blockingQueue );
+			enqThreads[ i ] = new EnqBlockThread( blockingQueue );
 			enqThreads[ i ].start();
 		}
 		
 		for ( int i = 0; i < q; i++ )
 		{
-			deqThreads[ i ] = new DeqThread( blockingQueue, n );
+			deqThreads[ i ] = new DeqBlockThread( blockingQueue, n );
 			deqThreads[ i ].start();
 		}
 		
@@ -142,7 +143,7 @@ public class BlockingQueue extends ThreadsafeQueue
 
 			@Override
 			public int compare(Operation o1, Operation o2) {
-				return o1.time.compareTo( o2.time );
+				return ( o1.time < o2.time ) ? -1 : ( o1.time == o2.time ) ? 0 : 1;
 			}
 			
 		} );
@@ -155,11 +156,11 @@ public class BlockingQueue extends ThreadsafeQueue
 	
 	private static class Operation
 	{
-		public LocalDateTime time;
+		public long time;
 		String name;
 		int id;
 		
-		Operation( LocalDateTime _time, String _name, int _id )
+		Operation( long _time, String _name, int _id )
 		{
 			time = _time;
 			name = _name;
@@ -168,7 +169,7 @@ public class BlockingQueue extends ThreadsafeQueue
 		
 		public String toString()
 		{
-			return name + " " + id + " - " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond() +"." + time.getNano()/1000000;
+			return name + " " + id + " - " + time;
 		}
 	}
 	

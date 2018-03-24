@@ -1,11 +1,11 @@
 import java.util.Random;
 
-public class EnqThread extends Thread 
+public class EnqBlockThread extends Thread 
 {
-	ThreadsafeQueue queue;
+	BlockingQueue queue;
 	boolean go = true;
 	
-	EnqThread( ThreadsafeQueue _queue )
+	EnqBlockThread( BlockingQueue _queue )
 	{
 		queue = _queue;
 	}
@@ -19,7 +19,7 @@ public class EnqThread extends Thread
 			Random rand = new Random();
 
 			try {
-				sleep( rand.nextInt(100) );
+				sleep( 5 + rand.nextInt(10) );
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
