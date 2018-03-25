@@ -1,14 +1,16 @@
+import java.util.concurrent.atomic.AtomicReference;
+
 public class LockItem
 {
 	int id;
 	long enqTime, deqTime;
 	
-	public Item next;
+	public AtomicReference<LockItem> next;
 	
 	LockItem( int _id )
 	{
 		id = _id;
-		next = null;
+		next = new AtomicReference<LockItem>( null );
 	}
 
 	public int getId() 
