@@ -20,10 +20,35 @@ public class LockFreeQueue
 	
 	public void enq() 
 	{
+		LockItem newIt 	= new LockItem( currID.getAndIncrement() );
+		while( true )
+		{
+			LockItem last 	= tail.get();
+			if( last == null ) //If empty queue
+			{
+				if ( tail.compareAndSet( null, newIt ) ) //if tail hasnt been editted already, edit it
+				{
+					head.set( newIt );	//No need to do any comparisons as head is only set once, and only if last is null AND the tail is updated
+					newIt.setEnqTime( System.currentTimeMillis() );
+					return;
+				}
+			}
+			else
+			{
+				if ( tail.compareAndSet( last, newIt ) ) //if tail hasnt been editted already, edit it
+				{
+					last.next.set( newIt );	// this reference can only be set once as tail,compareAndSet can only succeed once for each 'last' 
+											// which inhabits the tail reference so we can set it normally
+					newIt.setEnqTime( System.currentTimeMillis() );
+					return;
+				}
+			}
+		}
 	}
 
-	public LockItem deq() throws Exception 
+	public LockItem deq() 
 	{		
+		return null;
 	}
 	
 	public static void main( String[] args ) throws InterruptedException
