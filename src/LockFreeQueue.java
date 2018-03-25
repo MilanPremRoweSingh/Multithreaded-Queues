@@ -134,7 +134,7 @@ public class LockFreeQueue
 			enqThreads[ i ].join();
 		}
 		System.out.println( System.currentTimeMillis() - time );
-
+		/*
 		
 		ArrayList<Operation> operations = new ArrayList<Operation>();
 		for ( int i = 0; i < q; i++ )
@@ -160,7 +160,7 @@ public class LockFreeQueue
 		{
 			System.out.println( op.toString() );
 		}
-		
+		*/
 	}
 	
 	private static class Operation
