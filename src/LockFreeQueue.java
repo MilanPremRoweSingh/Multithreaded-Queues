@@ -12,39 +12,33 @@ public class LockFreeQueue
 	
 	public LockFreeQueue() 
 	{
-		head = new AtomicReference<LockItem>( null );
-		tail = new AtomicReference<LockItem>( null );
+		LockItem dummy = new LockItem( -1 );
+		head = new AtomicReference<LockItem>( dummy );
+		tail = new AtomicReference<LockItem>( dummy ); //dummy tail
 		
 		currID = new AtomicInteger( 0 );
 	}
 	
 	public void enq() 
 	{
-		LockItem newIt 	= new LockItem( currID.getAndIncrement() );
 		while( true )
 		{
-			LockItem last 	= tail.get();
-			if( last == null ) //If empty queue
+			LockItem last = tail.get();
+			LockItem next = last.next.get();
+			if( last == tail.get() ) //If empty queue
 			{
-				if ( tail.compareAndSet( null, newIt ) ) //if tail hasnt been editted already, edit it
+				if ( next == null ) //if tail hasnt been editted already, edit it
 				{
-					head.set( newIt );	//No need to do any comparisons as head is only set once, and only if last is null AND the tail is updated
+					LockItem newIt 	= new LockItem( currID.getAndIncrement() );
+					if ( last.next.compareAndSet( next, newIt ) )
+						tail.compareAndSet( last, newIt );
 					newIt.setEnqTime( System.currentTimeMillis() );
 					return;
 				}
 			}
 			else
 			{
-				if( head.get() == null )
-					continue;
-				
-				if ( tail.compareAndSet( last, newIt ) ) //if tail hasnt been editted already, edit it
-				{
-					last.next.set( newIt );	// this reference can only be set once as tail,compareAndSet can only succeed once for each 'last' 
-											// which inhabits the tail reference so we can set it normally
-					newIt.setEnqTime( System.currentTimeMillis() );
-					return;
-				}
+				tail.compareAndSet( last, next );
 			}
 		}
 	}
@@ -54,16 +48,28 @@ public class LockFreeQueue
 		while( true )
 		{
 			LockItem first 	= head.get();
-			if ( first != null ) //Dont do anything if queue is empty
+			LockItem last 	= tail.get();
+			LockItem next	= first.next.get();
+			
+			if( first == head.get() )
 			{
-				LockItem next	= first.next.get();
-				if ( head.compareAndSet( first, next ) )
+				if( first == last )
 				{
-					tail.get().next.compareAndSet( first, null );
-					first.setDeqTime( System.currentTimeMillis() );
-					return first;
+					if( next == null )
+					{
+						continue;
+					}
+					tail.compareAndSet(last , next);
 				}
-				
+				else
+				{
+					LockItem it = next;
+					if( head.compareAndSet( first, next ) )
+					{
+						it.setDeqTime( System.currentTimeMillis() );
+						return it;
+					}
+				}
 			}
 		}
 	}
