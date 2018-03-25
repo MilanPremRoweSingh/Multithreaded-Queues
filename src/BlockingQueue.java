@@ -101,6 +101,7 @@ public class BlockingQueue
 		EnqBlockThread[] enqThreads = new EnqBlockThread[ p ];
 		DeqBlockThread[] deqThreads = new DeqBlockThread[ q ];
 		
+		long time = System.currentTimeMillis();
 		for ( int i = 0; i < p; i++ ) 
 		{
 			enqThreads[ i ] = new EnqBlockThread( blockingQueue );
@@ -127,7 +128,8 @@ public class BlockingQueue
 		{
 			enqThreads[ i ].join();
 		}
-		
+		System.out.println( System.currentTimeMillis() - time );
+		/*
 		ArrayList<Operation> operations = new ArrayList<Operation>();
 		for ( int i = 0; i < q; i++ )
 		{
@@ -152,6 +154,7 @@ public class BlockingQueue
 		{
 			System.out.println( op.toString() );
 		}
+		*/
 	}
 	
 	private static class Operation

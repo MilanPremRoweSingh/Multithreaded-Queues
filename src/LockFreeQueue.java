@@ -35,6 +35,9 @@ public class LockFreeQueue
 			}
 			else
 			{
+				if( head.get() == null )
+					continue;
+				
 				if ( tail.compareAndSet( last, newIt ) ) //if tail hasnt been editted already, edit it
 				{
 					last.next.set( newIt );	// this reference can only be set once as tail,compareAndSet can only succeed once for each 'last' 
@@ -48,7 +51,6 @@ public class LockFreeQueue
 
 	public LockItem deq() 
 	{		
-		
 		while( true )
 		{
 			LockItem first 	= head.get();
@@ -57,7 +59,7 @@ public class LockFreeQueue
 				LockItem next	= first.next.get();
 				if ( head.compareAndSet( first, next ) )
 				{
-					tail.compareAndSet( first, null );
+					tail.get().next.compareAndSet( first, null );
 					first.setDeqTime( System.currentTimeMillis() );
 					return first;
 				}
@@ -97,7 +99,8 @@ public class LockFreeQueue
 		
 		EnqLockFreeThread[] enqThreads = new EnqLockFreeThread[ p ];
 		DeqLockFreeThread[] deqThreads = new DeqLockFreeThread[ q ];
-		
+
+		long time = System.currentTimeMillis();
 		for ( int i = 0; i < p; i++ ) 
 		{
 			enqThreads[ i ] = new EnqLockFreeThread( blockingQueue );
@@ -124,6 +127,8 @@ public class LockFreeQueue
 		{
 			enqThreads[ i ].join();
 		}
+		System.out.println( System.currentTimeMillis() - time );
+
 		
 		ArrayList<Operation> operations = new ArrayList<Operation>();
 		for ( int i = 0; i < q; i++ )
@@ -149,6 +154,7 @@ public class LockFreeQueue
 		{
 			System.out.println( op.toString() );
 		}
+		
 	}
 	
 	private static class Operation
@@ -168,6 +174,7 @@ public class LockFreeQueue
 		{
 			return name + " " + id + " - " + time;
 		}
+		
 	}
 	
 }

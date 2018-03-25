@@ -28,7 +28,8 @@ public class DeqBlockThread extends Thread
 				e.printStackTrace();
 			}
 			
-			deqItems.add( queue.deq() );
+			Item deqIt = queue.deq();
+			//deqItems.add( deqIt );
 		}
 	}
 	
