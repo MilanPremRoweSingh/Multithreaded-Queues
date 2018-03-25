@@ -48,7 +48,22 @@ public class LockFreeQueue
 
 	public LockItem deq() 
 	{		
-		return null;
+		
+		while( true )
+		{
+			LockItem first 	= head.get();
+			if ( first != null ) //Dont do anything if queue is empty
+			{
+				LockItem next	= first.next.get();
+				if ( head.compareAndSet( first, next ) )
+				{
+					tail.compareAndSet( first, null );
+					first.setDeqTime( System.currentTimeMillis() );
+					return first;
+				}
+				
+			}
+		}
 	}
 	
 	public static void main( String[] args ) throws InterruptedException

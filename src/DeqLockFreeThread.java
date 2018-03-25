@@ -12,6 +12,7 @@ public class DeqLockFreeThread extends Thread
 	{
 		queue = _queue;
 		numDeqs = _numDeqs;
+		deqItems = new ArrayList<LockItem>();
 	}
 	
 	@Override
@@ -28,12 +29,8 @@ public class DeqLockFreeThread extends Thread
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			try {
 				LockItem deqIt = queue.deq();
 				deqItems.add( deqIt );
-			} catch (Exception e) {
-				i--;
-			}
 		}
 	} 
 	
